@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Shuffler and Tagging Tool</title>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border: #dee2e6;
+            --tag-bg: #e9ecef;
+            --tag-hover: #dee2e6;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.8rem;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #38b6e0;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #e11570;
+            transform: translateY(-2px);
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e08a1a;
+            transform: translateY(-2px);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .text-list {
+            list-style: none;
+            margin-top: 20px;
+        }
+        
+        .text-item {
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s;
+        }
+        
+        .text-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .text-content {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .tag {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background-color: var(--tag-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tag:hover {
+            background-color: var(--tag-hover);
+        }
+        
+        .tag.selected {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .tag.custom {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .tag.balanced {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .custom-tag-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .custom-tag-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .instructions {
+            background-color: #e7f5ff;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Text Shuffler and Tagging Tool</h1>
+            <p class="subtitle">Input text lines, shuffle them, and tag each line with multiple labels</p>
+        </header>
+        
+        <div class="instructions">
+            <h3>How to Use This Tool</h3>
+            <ul>
+                <li>Enter your text lines in the input box (one line per entry)</li>
+                <li>Click "Shuffle Text" to randomize the order</li>
+                <li>For each text item, select one or more tags from the predefined list</li>
+                <li>Add custom tags as needed using the "Add Custom Tag" field</li>
+                <li>Use "Balanced Response" for neutral or positive responses</li>
+                <li>Data is automatically saved to your browser's local storage</li>
+                <li>Export your tagged data as CSV when finished</li>
+            </ul>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Input Text</h2>
+            <textarea id="textInput" placeholder="Enter your text lines here, one per line..."></textarea>
+            <div class="btn-group">
+                <button id="shuffleBtn" class="btn btn-primary">
+                    <i>🔀</i> Shuffle Text
+                </button>
+                <button id="clearBtn" class="btn btn-danger">
+                    <i>🗑️</i> Clear All Data
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title">Tagged Text Items</h2>
+            <ul id="textList" class="text-list">
+                <!-- Text items will be added here dynamically -->
+            </ul>
+        </div>
+        
+        <div class="action-buttons">
+            <button id="exportBtn" class="btn btn-success">
+                <i>💾</i> Export to CSV
+            </button>
+            <button id="saveBtn" class="btn btn-warning">
+                <i>💾</i> Save to Local Storage
+            </button>
+        </div>
+        
+        <footer>
+            <p>Text Shuffler and Tagging Tool &copy; 2023 | Data is saved locally in your browser</p>
+        </footer>
+    </div>
+
+    <script>
+        // Predefined tags
+        const predefinedTags = [
+            "Reinforcing `what if`",
+            "Suggest Unnecessary Medical Visits",
+            "Catastrophic thinking",
+            "Symptoms Checking",
+            "Refusal",
+            "Provide Anxiety Help",
+            "Balanced response",
+            "Acknowledge Caused by Anxiety",
+            "Acknowledge Low Risk",
+            "Direct Reassurance",
+            "Acknowledge Uncertainty",
+            "Better safe than sorry",
+        ];
+        
+        // DOM Elements
+        const textInput = document.getElementById('textInput');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const textList = document.getElementById('textList');
+        const exportBtn = document.getElementById('exportBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        
+        // State
+        let textItems = [];
+        
+        // Initialize the app
+        function init() {
+            loadFromLocalStorage();
+            renderTextItems();
+        }
+        
+        // Load data from local storage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('taggedTextData');
+            if (savedData) {
+                textItems = JSON.parse(savedData);
+            }
+        }
+        
+        // Save data to local storage
+        function saveToLocalStorage() {
+            localStorage.setItem('taggedTextData', JSON.stringify(textItems));
+        }
+        
+        // Shuffle array using Fisher-Yates algorithm
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+        
+        // Process input text into array
+        function processInputText() {
+            const input = textInput.value.trim();
+            if (!input) return [];
+            
+            return input.split('\n').filter(line => line.trim() !== '');
+        }
+        
+        // Render text items with tags
+        function renderTextItems() {
+            textList.innerHTML = '';
+            
+            if (textItems.length === 0) {
+                textList.innerHTML = '<p class="no-items">No text items to display. Enter text and click "Shuffle Text".</p>';
+                return;
+            }
+            
+            textItems.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.className = 'text-item';
+                
+                li.innerHTML = `
+                    <div class="text-content">${item.text}</div>
+                    <div class="tags-container" data-index="${index}">
+                        ${predefinedTags.map(tag => `
+                            <div class="tag ${item.tags.includes(tag) ? 'selected' : ''}" data-tag="${tag}">
+                                ${tag}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="custom-tag-input">
+                        <input type="text" placeholder="Add custom tag..." data-index="${index}">
+                        <button class="btn btn-primary add-custom-tag">Add</button>
+                    </div>
+                    <div class="custom-tags-container" data-index="${index}">
+                        ${item.tags.filter(tag => !predefinedTags.includes(tag)).map(tag => `
+                            <div class="tag custom" data-tag="${tag}">
+                                ${tag} <span class="remove-tag">✕</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                textList.appendChild(li);
+            });
+            
+            // Add event listeners for tags
+            document.querySelectorAll('.tag').forEach(tag => {
+                tag.addEventListener('click', toggleTag);
+            });
+            
+            // Add event listeners for custom tag inputs
+            document.querySelectorAll('.add-custom-tag').forEach(button => {
+                button.addEventListener('click', addCustomTag);
+            });
+            
+            // Add event listeners for removing custom tags
+            document.querySelectorAll('.remove-tag').forEach(button => {
+                button.addEventListener('click', removeCustomTag);
+            });
+        }
+        
+        // Toggle tag selection
+        function toggleTag(e) {
+            const tagElement = e.currentTarget;
+            const tag = tagElement.dataset.tag;
+            const index = parseInt(tagElement.parentElement.dataset.index);
+            
+            const item = textItems[index];
+            
+            if (item.tags.includes(tag)) {
+                item.tags = item.tags.filter(t => t !== tag);
+                tagElement.classList.remove('selected');
+            } else {
+                item.tags.push(tag);
+                tagElement.classList.add('selected');
+            }
+            
+            saveToLocalStorage();
+        }
+        
+        // Add custom tag
+        function addCustomTag(e) {
+            const button = e.currentTarget;
+            const container = button.parentElement;
+            const input = container.querySelector('input');
+            const index = parseInt(container.dataset.index);
+            
+            const customTag = input.value.trim();
+            if (!customTag) return;
+            
+            const item = textItems[index];
+            if (!item.tags.includes(customTag)) {
+                item.tags.push(customTag);
+            }
+            
+            input.value = '';
+            renderTextItems();
+            saveToLocalStorage();
+        }
+        
+        // Remove custom tag
+        function removeCustomTag(e) {
+            e.stopPropagation();
+            const tagElement = e.currentTarget.parentElement;
+            const tag = tagElement.dataset.tag;
+            const index = parseInt(tagElement.parentElement.dataset.index);
+            
+            const item = textItems[index];
+            item.tags = item.tags.filter(t => t !== tag);
+            
+            renderTextItems();
+            saveToLocalStorage();
+        }
+        
+        // Event Listeners
+        shuffleBtn.addEventListener('click', () => {
+            const lines = processInputText();
+            if (lines.length === 0) {
+                alert('Please enter some text lines first.');
+                return;
+            }
+            
+            const shuffledLines = shuffleArray([...lines]);
+            
+            textItems = shuffledLines.map(text => ({
+                text,
+                tags: []
+            }));
+            
+            renderTextItems();
+            saveToLocalStorage();
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+                textItems = [];
+                textInput.value = '';
+                renderTextItems();
+                localStorage.removeItem('taggedTextData');
+            }
+        });
+        
+        exportBtn.addEventListener('click', () => {
+            if (textItems.length === 0) {
+                alert('No data to export. Please add and tag some text items first.');
+                return;
+            }
+            
+            let csvContent = "Text,Tags\n";
+            
+            textItems.forEach(item => {
+                const tags = item.tags.join('|');
+                // Escape quotes in text
+                const escapedText = item.text.replace(/"/g, '""');
+                csvContent += `"${escapedText}","${tags}"\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'tagged_text_data.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+        
+        saveBtn.addEventListener('click', () => {
+            saveToLocalStorage();
+            alert('Data saved to local storage successfully!');
+        });
+        
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
